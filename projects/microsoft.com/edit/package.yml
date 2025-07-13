@@ -1,0 +1,32 @@
+distributable:
+  url: https://github.com/microsoft/edit/archive/refs/tags/{{version.tag}}.tar.gz
+  strip-components: 1
+
+display-name: msedit
+
+versions:
+  github: microsoft/edit/tags # reads github tags from github
+
+# dependencies:
+
+build:
+  dependencies:
+    unicode.org: ^77
+    rust-lang.org/rustup: "^1.28"
+    gnu.org/gcc: "^15"
+  env:
+    PATH: $HOME/.cargo/bin:$PATH
+  script:
+    - run:
+        - ln -sf {{deps.rust-lang.org/rustup.prefix}}/bin/rustup .
+        - rustup default nightly
+        - rustup component add rust-src
+        - ln -sf $HOME/.rustup/toolchains/*/bin/* .
+      working-directory: $HOME/.cargo/bin
+    - cargo install --config .cargo/release.toml --locked --path . --root {{prefix}}
+
+provides:
+  - bin/edit
+
+test:
+  script: edit --version | grep "^edit version {{version}}"
